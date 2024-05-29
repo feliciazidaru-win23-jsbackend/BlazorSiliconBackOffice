@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34916.146
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorSiliconBackOffice", "BlazorSiliconBackOffice\BlazorSiliconBackOffice\BlazorSiliconBackOffice.csproj", "{760B8A43-8401-4A8B-A15F-08816425932F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorSiliconBackOffice.Client", "BlazorSiliconBackOffice\BlazorSiliconBackOffice.Client\BlazorSiliconBackOffice.Client.csproj", "{1DF0D525-C7DF-4708-A976-6BE94821F8AA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{760B8A43-8401-4A8B-A15F-08816425932F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{760B8A43-8401-4A8B-A15F-08816425932F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{760B8A43-8401-4A8B-A15F-08816425932F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{760B8A43-8401-4A8B-A15F-08816425932F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DF0D525-C7DF-4708-A976-6BE94821F8AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DF0D525-C7DF-4708-A976-6BE94821F8AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DF0D525-C7DF-4708-A976-6BE94821F8AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DF0D525-C7DF-4708-A976-6BE94821F8AA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D59F57D7-819E-4C8A-B6D1-AAF052DB6A24}
+	EndGlobalSection
+EndGlobal
