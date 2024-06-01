@@ -1,0 +1,242 @@
+﻿@page "/User/UpdateUsers"
+@using System.Text.Json
+@using Microsoft.AspNetCore.Authorization
+@using System.Text
+@inject HttpClient Http
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@attribute [Authorize]
+<h3>Update Users</h3>
+
+@if (users == null)
+{
+    <p>Loading...</p>
+}
+else if (!users.Any())
+{
+    <p>No users found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>City</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.UserProfile.FirstName</td>
+                    <td>@user.UserProfile.LastName</td>
+                    <td>@user.Email</td>
+                    <td>@user.UserAddress.City</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditUser(user)">Edit</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (selectedUser != null)
+{
+    <EditForm Model="selectedUser" OnValidSubmit="UpdateUser">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label>First Name</label>
+            <InputText class="form-control" @bind-Value="selectedUser.UserProfile.FirstName" />
+        </div>
+        <div class="form-group">
+            <label>Last Name</label>
+            <InputText class="form-control" @bind-Value="selectedUser.UserProfile.LastName" />
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <InputText class="form-control" @bind-Value="selectedUser.Email" disabled />
+        </div>
+        <div class="form-group">
+            <label>City</label>
+            <InputText class="form-control" @bind-Value="selectedUser.UserAddress.City" />
+        </div>
+        <div class="form-group">
+            <label>Phone Number</label>
+            <InputText class="form-control" @bind-Value="selectedUser.PhoneNumber" />
+        </div>
+        <div class="form-group">
+            <label>Biography</label>
+            <InputTextArea class="form-control" @bind-Value="selectedUser.UserProfile.Biography" />
+        </div>
+        <button type="submit" class="btn btn-success">Update</button>
+        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+    </EditForm>
+}
+
+@if (!string.IsNullOrEmpty(updateStatusMessage))
+{
+    <h5>@updateStatusMessage</h5><img src="https://silicon.blob.core.windows.net/backoffficeimages/_5ed80bc2-9c58-42d3-9066-4af2870fcc26.jpg" alt="thumbs up" width="100" height="100" />
+}
+
+@code {
+    private List<ApplicationUser> users;
+    private ApplicationUser selectedUser;
+    private string updateStatusMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        var response = await Http.GetAsync("https://userprovidersilicon.azurewebsites.net/api/GetUsers?code=bmofQ3-fcq4yodLlF5G3X-Av5yk6UFi23_Mq8Z6uo4rbAzFuwxW1xQ%3D%3D");
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            users = JsonSerializer.Deserialize<List<ApplicationUser>>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+    }
+
+    private void EditUser(ApplicationUser user)
+    {
+        selectedUser = new ApplicationUser
+            {
+                Id = user.Id,
+                UserName = user.UserName,
+                NormalizedUserName = user.NormalizedUserName,
+                Email = user.Email,
+                NormalizedEmail = user.NormalizedEmail,
+                EmailConfirmed = user.EmailConfirmed,
+                PasswordHash = user.PasswordHash,
+                SecurityStamp = user.SecurityStamp,
+                ConcurrencyStamp = user.ConcurrencyStamp,
+                PhoneNumber = user.PhoneNumber,
+                PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+                TwoFactorEnabled = user.TwoFactorEnabled,
+                LockoutEnd = user.LockoutEnd,
+                LockoutEnabled = user.LockoutEnabled,
+                AccessFailedCount = user.AccessFailedCount,
+                UserProfileId = user.UserProfileId,
+                UserProfile = new UserProfile
+                {
+                    Id = user.UserProfile.Id,
+                    FirstName = user.UserProfile.FirstName,
+                    LastName = user.UserProfile.LastName,
+                    ProfilePicture = user.UserProfile.ProfilePicture,
+                    ProfileImageUrl = user.UserProfile.ProfileImageUrl,
+                    Biography = user.UserProfile.Biography
+                },
+                UserAddressId = user.UserAddressId,
+                UserAddress = new UserAddress
+                {
+                    Id = user.UserAddress.Id,
+                    AddressLine_1 = user.UserAddress.AddressLine_1,
+                    AddressLine_2 = user.UserAddress.AddressLine_2,
+                    PostalCode = user.UserAddress.PostalCode,
+                    City = user.UserAddress.City
+                }
+            };
+    }
+
+    private void CancelEdit()
+    {
+        selectedUser = null;
+    }
+
+    private async Task UpdateUser()
+    {
+        var updateUserForm = new UserForm
+            {
+                Email = selectedUser.Email,
+                PhoneNumber = selectedUser.PhoneNumber,
+                AddressLine_1 = selectedUser.UserAddress.AddressLine_1,
+                AddressLine_2 = selectedUser.UserAddress.AddressLine_2,
+                PostalCode = selectedUser.UserAddress.PostalCode,
+                City = selectedUser.UserAddress.City,
+                FirstName = selectedUser.UserProfile.FirstName,
+                LastName = selectedUser.UserProfile.LastName,
+                Biography = selectedUser.UserProfile.Biography
+            };
+
+        var content = JsonSerializer.Serialize(updateUserForm);
+        var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+
+        var response = await Http.PostAsync("https://userprovidersilicon.azurewebsites.net/api/UpdateUser?code=c1YCVd5t4y_PkIav-DVWkPDNoZ4mSd8EXQ8henR58-p2AzFuYuFuwQ%3D%3D", stringContent);
+
+        if (response.IsSuccessStatusCode)
+        {
+            updateStatusMessage = $"User with email '{selectedUser.Email}' has been successfully updated.";
+      
+            selectedUser = null;
+            await LoadUsers();
+        }
+        else
+        {
+            updateStatusMessage = $"Failed to update user with email '{selectedUser.Email}'. Error: {response.ReasonPhrase}";
+        }
+    }
+
+    public class ApplicationUser
+    {
+        public string Id { get; set; }
+        public string UserName { get; set; }
+        public string NormalizedUserName { get; set; }
+        public string Email { get; set; }
+        public string NormalizedEmail { get; set; }
+        public bool EmailConfirmed { get; set; }
+        public string PasswordHash { get; set; }
+        public string SecurityStamp { get; set; }
+        public string ConcurrencyStamp { get; set; }
+        public string PhoneNumber { get; set; }
+        public bool PhoneNumberConfirmed { get; set; }
+        public bool TwoFactorEnabled { get; set; }
+        public DateTimeOffset? LockoutEnd { get; set; }
+        public bool LockoutEnabled { get; set; }
+        public int AccessFailedCount { get; set; }
+        public string UserProfileId { get; set; }
+        public UserProfile UserProfile { get; set; }
+        public string UserAddressId { get; set; }
+        public UserAddress UserAddress { get; set; }
+    }
+
+    public class UserProfile
+    {
+        public string Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string ProfilePicture { get; set; }
+        public string ProfileImageUrl { get; set; }
+        public string Biography { get; set; }
+    }
+
+    public class UserAddress
+    {
+        public string Id { get; set; }
+        public string AddressLine_1 { get; set; }
+        public string AddressLine_2 { get; set; }
+        public string PostalCode { get; set; }
+        public string City { get; set; }
+    }
+
+    public class UserForm
+    {
+        public string Email { get; set; } = null!;
+        public string? PhoneNumber { get; set; }
+
+        public string AddressLine_1 { get; set; } = null!;
+        public string? AddressLine_2 { get; set; }
+        public string PostalCode { get; set; } = null!;
+        public string City { get; set; } = null!;
+
+        public string FirstName { get; set; } = null!;
+        public string LastName { get; set; } = null!;
+        public string? Biography { get; set; }
+    }
+}

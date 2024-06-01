@@ -1,0 +1,29 @@
+﻿@page "/User/Users"
+@using BlazorSiliconBackOffice.Data
+@using Microsoft.AspNetCore.Authorization
+@attribute [StreamRendering]
+@attribute [Authorize]
+@inject HttpClient Http
+
+<PageTitle>User Manager</PageTitle>
+<section id="manager">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 text-center">
+                <div class="title">
+                    <h1>Welcome to Silicon User Manager</h1>
+                    <p>Choose one of the following options:</p>
+                </div>
+                <div class="options">
+                    <NavLink class="nav-link" href="/User/ListUsers">Display all users</NavLink>
+                    <NavLink class="nav-link" href="/User/UpdateUsers">Update user information</NavLink>
+                    <NavLink class="nav-link" href="/User/DeleteUsers">Delete user</NavLink>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <img class="img-fluid" src="https://silicon.blob.core.windows.net/backoffficeimages/silicon.jpg" alt="user image background" />
+            </div>
+        </div>
+    </div>
+</section>
+

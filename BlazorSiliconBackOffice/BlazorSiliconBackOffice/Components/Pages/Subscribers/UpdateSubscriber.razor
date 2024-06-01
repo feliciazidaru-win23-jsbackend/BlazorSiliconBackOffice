@@ -1,0 +1,170 @@
+﻿@page "/Subscribers/Update"
+
+@using System.Text.Json
+@using Microsoft.AspNetCore.Authorization
+@using System.Text
+
+@inject HttpClient Http
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@attribute [Authorize]
+<h3>Update Subscribers</h3>
+
+@if (subscribers == null)
+{
+    <p>Loading...</p>
+}
+else if (!subscribers.Any())
+{
+    <p>No subscribers found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Daily Newsletter</th>
+                <th>Advertising Updates</th>
+                <th>Week in Review</th>
+                <th>Event Updates</th>
+                <th>Startups Weekly</th>
+                <th>Podcasts</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var subscriber in subscribers)
+            {
+                <tr>
+                    <td>@subscriber.Email</td>
+                    <td>@(subscriber.DailyNewsletter ? "Yes" : "No")</td>
+                    <td>@(subscriber.AdvertisingUpdates ? "Yes" : "No")</td>
+                    <td>@(subscriber.WeekinReview ? "Yes" : "No")</td>
+                    <td>@(subscriber.EventUpdates ? "Yes" : "No")</td>
+                    <td>@(subscriber.StartupsWeekly ? "Yes" : "No")</td>
+                    <td>@(subscriber.Podcasts ? "Yes" : "No")</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditSubscriber(subscriber)">Update</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (selectedSubscriber != null)
+{
+    <EditForm Model="selectedSubscriber" OnValidSubmit="Update">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div class="form-group">
+            <label>Email</label>
+            <InputText class="form-control" @bind-Value="selectedSubscriber.Email" disabled />
+        </div>
+        <div class="form-group">
+            <label>Daily Newsletter</label>
+            <InputCheckbox class="form-check-input" @bind-Value="selectedSubscriber.DailyNewsletter" />
+        </div>
+        <div class="form-group">
+            <label>Advertising Updates</label>
+            <InputCheckbox class="form-check-input" @bind-Value="selectedSubscriber.AdvertisingUpdates" />
+        </div>
+        <div class="form-group">
+            <label>Week in Review</label>
+            <InputCheckbox class="form-check-input" @bind-Value="selectedSubscriber.WeekinReview" />
+        </div>
+        <div class="form-group">
+            <label>Event Updates</label>
+            <InputCheckbox class="form-check-input" @bind-Value="selectedSubscriber.EventUpdates" />
+        </div>
+        <div class="form-group">
+            <label>Startups Weekly</label>
+            <InputCheckbox class="form-check-input" @bind-Value="selectedSubscriber.StartupsWeekly" />
+        </div>
+        <div class="form-group">
+            <label>Podcasts</label>
+            <InputCheckbox class="form-check-input" @bind-Value="selectedSubscriber.Podcasts" />
+        </div>
+        <button type="submit" class="btn btn-success">Update</button>
+        <button type="button" class="btn btn-secondary" @onclick="CancelEdit">Cancel</button>
+    </EditForm>
+}
+
+@if (!string.IsNullOrEmpty(updateStatusMessage))
+{
+    <h5>@updateStatusMessage</h5>
+    <img src="https://silicon.blob.core.windows.net/backoffficeimages/_5ed80bc2-9c58-42d3-9066-4af2870fcc26.jpg" alt="thumbs up" width="100" height="100" />
+}
+
+@code {
+    private List<SubscribeEntity> subscribers;
+    private SubscribeEntity selectedSubscriber;
+    private string updateStatusMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSubscribers();
+    }
+
+    private async Task LoadSubscribers()
+    {
+        var response = await Http.GetAsync("https://newsletter-provider-silicon.azurewebsites.net/api/GetAllSubscribers?code=ckn3VP7IxQ02Rms-WFJVB_BrYy1nqqheX8uVzUD3OjBFAzFu7-9Htg%3D%3D");
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            subscribers = JsonSerializer.Deserialize<List<SubscribeEntity>>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+    }
+
+    private void EditSubscriber(SubscribeEntity subscriber)
+    {
+        selectedSubscriber = new SubscribeEntity
+            {
+                Email = subscriber.Email,
+                DailyNewsletter = subscriber.DailyNewsletter,
+                AdvertisingUpdates = subscriber.AdvertisingUpdates,
+                WeekinReview = subscriber.WeekinReview,
+                EventUpdates = subscriber.EventUpdates,
+                StartupsWeekly = subscriber.StartupsWeekly,
+                Podcasts = subscriber.Podcasts
+            };
+    }
+
+    private void CancelEdit()
+    {
+        selectedSubscriber = null;
+    }
+
+    private async Task Update()
+    {
+        var content = JsonSerializer.Serialize(selectedSubscriber);
+        var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+
+        var response = await Http.PostAsync("https://newsletter-provider-silicon.azurewebsites.net/api/UpdateSubscriber?code=lpzNUHlT2w_dfpBuznWWAHNFTgmT__nNY3h6Uh2SutE_AzFuVrdcvw%3D%3D", stringContent);
+
+        if (response.IsSuccessStatusCode)
+        {
+            updateStatusMessage = $"Subscriber with email '{selectedSubscriber.Email}' has been successfully updated.";
+
+            selectedSubscriber = null;
+            await LoadSubscribers();
+        }
+        else
+        {
+            updateStatusMessage = $"Failed to update subscriber with email '{selectedSubscriber.Email}'. Error: {response.ReasonPhrase}";
+        }
+    }
+    private class SubscribeEntity
+    {
+        public string Email { get; set; } = null!;
+
+        public bool DailyNewsletter { get; set; }
+        public bool AdvertisingUpdates { get; set; }
+        public bool WeekinReview { get; set; }
+        public bool EventUpdates { get; set; }
+        public bool StartupsWeekly { get; set; }
+        public bool Podcasts { get; set; }
+    }
+}
+}

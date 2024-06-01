@@ -1,0 +1,45 @@
+﻿@page "/Subscribers/GetAll"
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
+@using BlazorSiliconBackOffice.Data
+@inject HttpClient Http
+
+<PageTitle>Silicon Subscriber List</PageTitle>
+
+<h1>The list of the registered subscribers</h1>
+
+@if (subscribers == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    @foreach (var subscriber in subscribers)
+    {
+        <div class="mb-3">
+            @subscriber.Email
+        </div>
+    }
+}
+
+@code {
+    private SubscribeEntity[]? subscribers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        subscribers = await Http.GetFromJsonAsync<SubscribeEntity[]>("https://newsletter-provider-silicon.azurewebsites.net/api/GetAllSubscribers?code=ckn3VP7IxQ02Rms-WFJVB_BrYy1nqqheX8uVzUD3OjBFAzFu7-9Htg%3D%3D");
+    }
+
+    private class SubscribeEntity{
+        public string Email { get; set; } = null!;
+
+        public bool DailyNewsletter { get; set; }
+        public bool AdvertisingUpdates { get; set; }
+        public bool WeekinReview { get; set; }
+        public bool EventUpdates { get; set; }
+        public bool StartupsWeekly { get; set; }
+        public bool Podcasts { get; set; }
+    }
+}

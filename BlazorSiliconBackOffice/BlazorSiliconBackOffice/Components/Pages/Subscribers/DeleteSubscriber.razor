@@ -1,0 +1,121 @@
+﻿@page "/Subscribers/DeleteSubscriber"
+
+@using System.Text.Json
+@using Microsoft.AspNetCore.Authorization
+@using System.Text
+@inject HttpClient Http
+@rendermode InteractiveServer
+@attribute [StreamRendering]
+@attribute [Authorize]
+<h3>Delete Subscribers</h3>
+
+@if (subscribers == null)
+{
+    <p>Loading...</p>
+}
+else if (!subscribers.Any())
+{
+    <p>No subscribers found.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Daily Newsletter</th>
+                <th>Advertising Updates</th>
+                <th>Week in Review</th>
+                <th>Event Updates</th>
+                <th>Startups Weekly</th>
+                <th>Podcasts</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var subscriber in subscribers)
+            {
+                <tr>
+                    <td>@subscriber.Email</td>
+                    <td>@(subscriber.DailyNewsletter ? "Yes" : "No")</td>
+                    <td>@(subscriber.AdvertisingUpdates ? "Yes" : "No")</td>
+                    <td>@(subscriber.WeekinReview ? "Yes" : "No")</td>
+                    <td>@(subscriber.EventUpdates ? "Yes" : "No")</td>
+                    <td>@(subscriber.StartupsWeekly ? "Yes" : "No")</td>
+                    <td>@(subscriber.Podcasts ? "Yes" : "No")</td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="() => DeleteSubscriber(subscriber.Email)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@if (!string.IsNullOrEmpty(deleteStatusMessage))
+{
+    <div>@deleteStatusMessage</div>
+}
+
+@code {
+    private List<SubscribeEntity> subscribers;
+    private string deleteStatusMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSubscribers();
+    }
+
+    private async Task LoadSubscribers()
+    {
+        var response = await Http.GetAsync("https://newsletter-provider-silicon.azurewebsites.net/api/GetAllSubscribers?code=ckn3VP7IxQ02Rms-WFJVB_BrYy1nqqheX8uVzUD3OjBFAzFu7-9Htg%3D%3D");
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            subscribers = JsonSerializer.Deserialize<List<SubscribeEntity>>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+    }
+
+    private async Task DeleteSubscriber(string email)
+    {
+      
+        string baseUrl = "https://newsletter-provider-silicon.azurewebsites.net/api/Unsubscribe";
+        string functionCode = "zf5rwvFTS7ewAcRyAPj97-lHdsWacAbiKqeEeD0E2HSiAzFunz_L0w%3D%3D";
+        string url = $"{baseUrl}?code={functionCode}";
+
+
+   
+        var deleteSubscriberData = new { Email = email };
+
+      
+        var content = JsonSerializer.Serialize(deleteSubscriberData);
+        var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+        var response = await Http.PostAsync(url, stringContent);
+        if (response.IsSuccessStatusCode)
+        {
+            
+            var subscriberToRemove = subscribers.FirstOrDefault(s => s.Email == email);
+            if (subscriberToRemove != null)
+            {
+                subscribers.Remove(subscriberToRemove);
+                deleteStatusMessage = $"Subscriber with email '{email}' has been successfully deleted.";
+            }
+        }
+        else
+        {
+            
+            deleteStatusMessage = $"Failed to delete subscriber with email '{email}'. Error: {response.ReasonPhrase}";
+        }
+    }
+    private class SubscribeEntity
+    {
+        public string Email { get; set; } = null!;
+
+        public bool DailyNewsletter { get; set; }
+        public bool AdvertisingUpdates { get; set; }
+        public bool WeekinReview { get; set; }
+        public bool EventUpdates { get; set; }
+        public bool StartupsWeekly { get; set; }
+        public bool Podcasts { get; set; }
+    }
+}
