@@ -1,4 +1,4 @@
-﻿@page "/Subscribers/DeleteSubscriber"
+﻿@page "/User/DeleteSubscriber"
 
 @using System.Text.Json
 @using Microsoft.AspNetCore.Authorization
@@ -44,7 +44,7 @@ else
                     <td>@(subscriber.StartupsWeekly ? "Yes" : "No")</td>
                     <td>@(subscriber.Podcasts ? "Yes" : "No")</td>
                     <td>
-                        <button class="btn btn-danger" @onclick="() => DeleteSubscriber(subscriber.Email)">Delete</button>
+                        <button class="btn btn-danger" @onclick="() => Delete(subscriber.Email)">Delete</button>
                     </td>
                 </tr>
             }
@@ -76,7 +76,7 @@ else
         }
     }
 
-    private async Task DeleteSubscriber(string email)
+    private async Task Delete(string email)
     {
       
         string baseUrl = "https://newsletter-provider-silicon.azurewebsites.net/api/Unsubscribe";

@@ -8,12 +8,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Components\Pages\Course\CoursesManager.razor" />
     <Content Remove="Components\Pages\Subscribers\DeleteSubscriber.razor" />
     <Content Remove="Components\Pages\Subscribers\SubscriberMenu.razor" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BlazorSiliconBackOffice.Client\BlazorSiliconBackOffice.Client.csproj" />
+    <PackageReference Include="GraphQl.Client" Version="6.1.0" />
+    <PackageReference Include="GraphQl.Client.Serializer.Newtonsoft" Version="6.1.0" />
+    <PackageReference Include="GraphQl.Client.Serializer.SystemTextJson" Version="6.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.5" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.5" />
@@ -27,13 +31,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <_ContentIncludedByDefault Remove="Components\Pages\Course\CoursesManager.razor" />
     <_ContentIncludedByDefault Remove="Components\Pages\Subscribers\DeleteSubscriber.razor" />
     <_ContentIncludedByDefault Remove="Components\Pages\Subscribers\SubscriberMenu.razor" />
     <_ContentIncludedByDefault Remove="Components\Pages\User\Users.razor" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Components\Pages\Subscribers\DeleteSubscriber.razor" />
+    <None Include="Components\Pages\Course\CoursesManager.razor" />
+    <None Include="Components\Pages\User\DeleteSubscriber.razor" />
     <None Include="Components\Pages\Subscribers\SubscriberMenu.razor" />
     <None Include="Components\Pages\User\Users.razor" />
   </ItemGroup>
@@ -44,6 +50,10 @@
 
   <ItemGroup>
     <UpToDateCheckInput Remove="Components\Pages\Subscribers\DeleteSubscriber.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Components\Pages\Course\CoursesManager.razor" />
   </ItemGroup>
 
 </Project>
